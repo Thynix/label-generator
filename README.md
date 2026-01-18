@@ -14,6 +14,8 @@ and [this](https://www.printables.com/model/367598-filament-swatches-avery-no-15
 
     python main.py example.yaml
 
+[![example photo](/IMG_1987-480.jpg)](/IMG_1987.jpg)
+
 ## Format
 
 Takes YAML list of filaments:
