@@ -1,27 +1,28 @@
 import argparse
-import os
+import subprocess
 import sys
 
 import qrcode
 import yaml
-from PIL import Image, PSDraw
+from PIL import PSDraw
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("yamlpath", help="Path to the description of label content")
-    parser.add_argument("--show-template",
-                        help="Specify to enable showing the template with label bounds",
-                        action="store_true")
     args = parser.parse_args()
 
     labels = yaml.safe_load(open(args.yamlpath))
+    if len(labels) > 30:
+        print(f"Error: too many labels. Found {len(labels)}, but a page only fits 30.")
+        exit(1)
+
+    page_width, page_height = 612, 792  # letter size in points
+    # page_width, page_height = 595, 842  # A4 size in points
 
     with open("labels.ps", "wb") as ps_file:
         ps = PSDraw.PSDraw(ps_file)
         ps.begin_document()
-
-        page_width, page_height = 595, 842  # A4 size in points
 
         # Define the PostScript fonts
         font_name = "Helvetica-Bold"
@@ -30,25 +31,30 @@ def main():
         note_font_size = 10
         dpi = 72
 
-        # Fill the page with the template
-        if args.show_template:
-            print("this feature is busted due to being misaligned", file=sys.stderr)
-            exit(2)
-            png_path = os.path.join(os.path.dirname(__file__), "Avery15660AddressLabels.png")
-            with Image.open(png_path) as label_background:
-                # Why is it an inch offset? Dunno
-                ps.image((0, 0, page_width, page_height), label_background, dpi)
-
+        # Label page layout measurements in inches
         label_height = 1
         label_width = 2 + 5 / 8
         horizontal_edge_padding = 1 / 8  # space to the left before label text starts
-        vertical_edge_padding = 1 / 8  # space to the top before label text starts
+        vertical_edge_padding = 1 / 16  # space to the top before label text starts
 
         horizontal_label_spacing = 1 / 8  # horizontal space between labels; vertical is flush
 
         # space from the edge of the page to the start of the label
         horizontal_label_offset = 1 / 5
-        vertical_label_offset = 1 / 2
+        vertical_label_offset = 1 / 3
+
+        # Draw a box halfway between the edges and the labels in to show where the bounds are.
+        # Go entirely to the edge instead of only having lines at the halfway mark to be clearer about what's happening.
+        def horizontal_line(y):
+            ps.line((0, y), (page_width, y))
+
+        def vertical_line(x):
+            ps.line((x, 0), (x, page_height))
+
+        horizontal_line(vertical_label_offset * dpi // 2)
+        horizontal_line(page_height - (vertical_label_offset * dpi // 2))
+        vertical_line(horizontal_label_offset * dpi // 2)
+        vertical_line(page_width - (horizontal_label_offset * dpi // 2))
 
         # 3 columns of 10 labels
         i = 0
@@ -64,11 +70,10 @@ def main():
                     print(f"label {i} is missing brand and/or color. Its fields are: {label}", file=sys.stderr)
                     exit(1)
 
-                # orizontal_label_offset, page_width - horizontal_label_offset, int(dpi * (label_width + horizontal_label_padding))
-                # vertical_label_offset, page_height - vertical_label_offset, int(dpi * label_height)
                 # Height in PostScript starts at the bottom of the page
                 y = int((vertical_label_offset + label_height * (row_index + 1) - vertical_edge_padding) * dpi)
-                x = int((horizontal_label_offset + (label_width + horizontal_label_spacing) * column_index + horizontal_edge_padding) * dpi)
+                x = int((horizontal_label_offset + (
+                            label_width + horizontal_label_spacing) * column_index + horizontal_edge_padding) * dpi)
 
                 print(x, y, label["color"])
 
@@ -99,10 +104,11 @@ def main():
                 # TODO: maybe big X or "discontinued" if not specified
 
         ps.end_document()
-        Image.open("labels.png").save(ps)
 
-    if len(labels):
-        print(f"{len(labels)} remaining labels not included")
+    subprocess.run(["ps2pdf",
+                    f"-dDEVICEWIDTHPOINTS={page_width}", f"-dDEVICEHEIGHTPOINTS={page_height}",
+                    # "-sPAPERSIZE=legal",  # For some cursed reason, this results in an extra 3 inches of blank space at the top of the page.
+                    "labels.ps", "labels.pdf"])
 
 
 main()
