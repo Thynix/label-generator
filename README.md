@@ -5,7 +5,14 @@ used by 3D printing filament swatches such as [this](https://www.printables.com/
 and [this](https://www.printables.com/model/367598-filament-swatches-avery-no-15660).
 (I'm using the latter, which includes filament type in the print, so I'd put filament type in the notes if at all.)
 
+## Setup
+
+    sudo apt install -y ghostscript
+    pip install -r requirements.txt
+
 ## Example
+
+    python main.py example.yaml
 
 ## Format
 
