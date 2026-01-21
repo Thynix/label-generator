@@ -10,6 +10,9 @@ from PIL import PSDraw
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("yamlpath", help="Path to the description of label content")
+    parser.add_argument("--draw_edges",
+                        help="If specified, draw alignment lines near the edges of the page.",
+                        action="store_true")
     args = parser.parse_args()
 
     labels = yaml.safe_load(open(args.yamlpath))
@@ -51,10 +54,11 @@ def main():
         def vertical_line(x):
             ps.line((x, 0), (x, page_height))
 
-        horizontal_line(vertical_label_offset * dpi // 2)
-        horizontal_line(page_height - (vertical_label_offset * dpi // 2))
-        vertical_line(horizontal_label_offset * dpi // 2)
-        vertical_line(page_width - (horizontal_label_offset * dpi // 2))
+        if args.draw_edges:
+            horizontal_line(vertical_label_offset * dpi // 2)
+            horizontal_line(page_height - (vertical_label_offset * dpi // 2))
+            vertical_line(horizontal_label_offset * dpi // 2)
+            vertical_line(page_width - (horizontal_label_offset * dpi // 2))
 
         # 3 columns of 10 labels
         i = 0
