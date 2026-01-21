@@ -13,6 +13,9 @@ def main():
     parser.add_argument("--draw_edges",
                         help="If specified, draw alignment lines near the edges of the page.",
                         action="store_true")
+    parser.add_argument("--skip_count",
+                        help="Skip labels at the beginning of the page. For if a previous print left some over.",
+                        default=0, type=int)
     args = parser.parse_args()
 
     labels = yaml.safe_load(open(args.yamlpath))
@@ -66,6 +69,10 @@ def main():
             for row_index in range(10):
                 if not labels:
                     break
+
+                if args.skip_count > 0:
+                    args.skip_count -= 1
+                    continue
 
                 label = labels.pop()
                 i += 1
