@@ -1,9 +1,12 @@
 # label-generator
 
-For Avery 1"x2 5/8" labels such as [5160](https://www.avery.com/products/labels/5160)
-used by 3D printing filament swatches such as [this](https://www.printables.com/model/111326-filament-swatch-library)
-and [this](https://www.printables.com/model/367598-filament-swatches-avery-no-15660).
-(I'm using the latter, which includes filament type in the print, so I'd put filament type in the notes if at all.)
+For [Avery 1"x2-5/8" labels](https://www.avery.com/products/labels/shape/rectangle-labels?filters=size_1%22+x+2-5%2F8%22%7EsheetSize_8-1%2F2%22+x+11%22)
+such as [5160](https://www.avery.com/products/labels/5160) used by 3D printing
+filament swatches such as
+[this](https://www.printables.com/model/111326-filament-swatch-library) and
+[this](https://www.printables.com/model/1564840-filament-swatch-with-translucency-test-avery-1-x-2).
+(I'm using the latter, which includes filament type in the print, so I'd put filament type in the notes if at all.
+Usually just filament type details, if any.)
 
 ## Setup
 
